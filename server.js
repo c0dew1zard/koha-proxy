@@ -13,15 +13,44 @@ const CLIENT_ID = process.env.KOHA_CLIENT_ID;
 const CLIENT_SECRET = process.env.KOHA_CLIENT_SECRET;
 
 
-// CORS middleware to allow all origins (can be customized later)
-//app.use(cors());
+// Function to import MARCXML record into Koha
+async function importMARCXML(marcxmlRecord) {
+    const token = await getAccessToken();
+    if (!token) {
+        console.error("Failed to obtain access token.");
+        return;
+    }
+
+    try {
+        const response = await axios.post(
+            IMPORT_URL,
+            marcxmlRecord,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/marcxml+xml",
+                },
+            }
+        );
+
+        //console.log('importMARCXML', response.data);
+
+        return response.data;
+
+        //console.log("MARCXML import successful:", response.data);
+    } catch (error) {
+        return error.response?.data || error;
+        //console.error("Error importing MARCXML:", error.response?.data || error);
+    }
+}
+
 
 
 app.use(cors({
-  origin: "*", // Change "*" to your frontend URL for security
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+    origin: "*", // Change "*" to your frontend URL for security
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
 }));
 
 
@@ -36,25 +65,25 @@ app.use(express.raw({ type: 'application/marcxml+xml', limit: '10mb' }));
 // Default route to check if the service is running and to get the public IP
 app.get("/", async (req, res) => {
     try {
-      // Get public IP
-      const response = await axios.get("https://api64.ipify.org?format=json");
-      const publicIP = response.data.ip;
-      
-      console.log("Public IP Address:", publicIP); // Log IP to the console
-  
-      // Respond with the message and the public IP
-      res.status(200).send({
-        message: "Webservice is running",
-        publicIP: publicIP
-      });
+        // Get public IP
+        const response = await axios.get("https://api64.ipify.org?format=json");
+        const publicIP = response.data.ip;
+
+        console.log("Public IP Address:", publicIP); // Log IP to the console
+
+        // Respond with the message and the public IP
+        res.status(200).send({
+            message: "Webservice is running",
+            publicIP: publicIP
+        });
     } catch (error) {
-      console.error("Error getting public IP:", error);
-      res.status(500).send({
-        message: "Error getting public IP",
-        error: error.message
-      });
+        console.error("Error getting public IP:", error);
+        res.status(500).send({
+            message: "Error getting public IP",
+            error: error.message
+        });
     }
-  });
+});
 
 
 // Define a single route to import unimarc to koha
@@ -64,7 +93,7 @@ app.post('/api/v1/import', async (req, res) => {
 
         let unimarcRecord = req.body.toString();
         //console.log('UNIMARC:', unimarcRecord);
-        
+
         let koharesponse = await importMARCXML(unimarcRecord);
 
         console.log('importMARCXML', koharesponse);
@@ -88,54 +117,24 @@ app.listen(port, () => {
 async function getAccessToken() {
     try {
 
-      console.log("TOKEN_URL:", TOKEN_URL);
-      console.log("CLIENT_ID:",CLIENT_ID);
-      console.log("CLIENT_SECRET:",CLIENT_SECRET);
+        console.log("TOKEN_URL:", TOKEN_URL);
+        console.log("CLIENT_ID:", CLIENT_ID);
+        console.log("CLIENT_SECRET:", CLIENT_SECRET);
 
-      const response = await axios.post(
-        TOKEN_URL,
-        new URLSearchParams({
-          grant_type: "client_credentials",
-          client_id: CLIENT_ID,
-          client_secret: CLIENT_SECRET,
-        }),
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-      );
-  
-      return response.data.access_token;
+        const response = await axios.post(
+            TOKEN_URL,
+            new URLSearchParams({
+                grant_type: "client_credentials",
+                client_id: CLIENT_ID,
+                client_secret: CLIENT_SECRET,
+            }),
+            { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        );
+
+        return response.data.access_token;
     } catch (error) {
-      console.error("Error getting access token:", error.response?.data || error);
-      return null;
+        console.error("Error getting access token:", error.response?.data || error);
+        return null;
     }
-  }
+}
 
-// Function to import MARCXML record into Koha
-async function importMARCXML(marcxmlRecord) {
-    const token = await getAccessToken();
-    if (!token) {
-      console.error("Failed to obtain access token.");
-      return;
-    }
-  
-    try {
-      const response = await axios.post(
-        IMPORT_URL,
-        marcxmlRecord,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/marcxml+xml",
-          },
-        }
-      );
-
-      //console.log('importMARCXML', response.data);
-
-      return response.data;
-  
-      //console.log("MARCXML import successful:", response.data);
-    } catch (error) {
-      return error.response?.data || error;  
-      //console.error("Error importing MARCXML:", error.response?.data || error);
-    }
-  }
