@@ -69,6 +69,9 @@ app.get("/", async (req, res) => {
         const response = await axios.get("https://api64.ipify.org?format=json");
         const publicIP = response.data.ip;
 
+        console.log("TOKEN_URL:", TOKEN_URL);
+        console.log("CLIENT_ID:", CLIENT_ID);
+        console.log("CLIENT_SECRET:", CLIENT_SECRET);
         console.log("Public IP Address:", publicIP); // Log IP to the console
 
         // Respond with the message and the public IP
