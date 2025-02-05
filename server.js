@@ -6,11 +6,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Koha API Configuration
-const KOHA_BASE_URL = "https://opac.cm-gaia.pt";
+const KOHA_BASE_URL = process.env.KOHA_BASE_URL;
 const TOKEN_URL = `${KOHA_BASE_URL}/api/v1/oauth/token`;
 const IMPORT_URL = `${KOHA_BASE_URL}/api/v1/biblios`;
-const CLIENT_ID = "70c04012-4034-426f-b0af-60a307172f82";
-const CLIENT_SECRET = "c3e4910a-09ea-4087-89f9-4456eed69ec0";
+const CLIENT_ID = process.env.KOHA_CLIENT_ID;
+const CLIENT_SECRET = process.env.KOHA_CLIENT_SECRET;
 
 
 // CORS middleware to allow all origins (can be customized later)
@@ -31,6 +31,11 @@ app.use(express.json());
 
 // Middleware to handle XML body parsing
 app.use(express.raw({ type: 'application/marcxml+xml', limit: '10mb' }));
+
+app.get("/", (req, res) => {
+    res.status(200).send("webservice is running");
+  });
+  
 
 
 // Define a single route to import unimarc to koha
