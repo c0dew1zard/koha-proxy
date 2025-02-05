@@ -32,10 +32,29 @@ app.use(express.json());
 // Middleware to handle XML body parsing
 app.use(express.raw({ type: 'application/marcxml+xml', limit: '10mb' }));
 
-app.get("/", (req, res) => {
-    res.status(200).send("webservice is running");
-  });
+
+// Default route to check if the service is running and to get the public IP
+app.get("/", async (req, res) => {
+    try {
+      // Get public IP
+      const response = await axios.get("https://api64.ipify.org?format=json");
+      const publicIP = response.data.ip;
+      
+      console.log("Public IP Address:", publicIP); // Log IP to the console
   
+      // Respond with the message and the public IP
+      res.status(200).send({
+        message: "Webservice is running",
+        publicIP: publicIP
+      });
+    } catch (error) {
+      console.error("Error getting public IP:", error);
+      res.status(500).send({
+        message: "Error getting public IP",
+        error: error.message
+      });
+    }
+  });
 
 
 // Define a single route to import unimarc to koha
@@ -68,6 +87,11 @@ app.listen(port, () => {
 // Function to get OAuth2 token for Koha
 async function getAccessToken() {
     try {
+
+      console.log("TOKEN_URL:", TOKEN_URL);
+      console.log("CLIENT_ID:",CLIENT_ID);
+      console.log("CLIENT_SECRET:",CLIENT_SECRET);
+
       const response = await axios.post(
         TOKEN_URL,
         new URLSearchParams({
