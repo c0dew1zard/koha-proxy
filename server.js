@@ -44,6 +44,7 @@ async function importMARCXML(marcxmlRecord) {
     }
 }
 
+app.options('*', cors()); // Permite OPTIONS para todas as rotas
 
 
 app.use(cors({
