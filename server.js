@@ -112,7 +112,7 @@ app.post('/api/v1/import', async (req, res) => {
 
 
 // Start the server
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(port, "0.0.0.0", () => {
     console.log(`Proxy server running on http://localhost:${port}`);
 });
 
