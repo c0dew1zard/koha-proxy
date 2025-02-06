@@ -89,6 +89,15 @@ app.get("/", async (req, res) => {
     }
 });
 
+// Define a single route to import unimarc to koha
+app.post('/api/v1/hellocors', async (req, res) => {
+
+    console.log("HELLOCORS");
+    res.status(200).send({ message: "Hello CORS!" });
+
+});
+
+
 
 // Define a single route to import unimarc to koha
 app.post('/api/v1/import', async (req, res) => {
