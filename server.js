@@ -44,15 +44,22 @@ async function importMARCXML(marcxmlRecord) {
     }
 }
 
-app.options('*', cors()); // Permite OPTIONS para todas as rotas
+// Log CORS requests before handling them
+app.use((req, res, next) => {
+    console.log(`CORS request from: ${req.get('Origin')}`);
+    next(); // Continue to the next middleware or route handler
+  });
 
-
+// Apply CORS middleware
 app.use(cors({
-    origin: "*", // Change "*" to your frontend URL for security
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: "*", // Replace with your frontend URL for security
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
-}));
+  }));
+  
+  // Handle preflight requests (OPTIONS) globally
+app.options('*', cors());
 
 
 // To parse JSON bodies in POST requests
